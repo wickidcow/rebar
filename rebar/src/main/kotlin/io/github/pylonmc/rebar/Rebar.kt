@@ -45,7 +45,6 @@ import io.github.pylonmc.rebar.nms.NmsAccessor
 import io.github.pylonmc.rebar.util.mergeResource
 import io.github.pylonmc.rebar.waila.Waila
 import io.github.pylonmc.rebar.integration.WailaPlaceholders
-import io.papermc.paper.ServerBuildInfo
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -76,22 +75,30 @@ object Rebar : JavaPlugin(), RebarAddon {
     /**
      * Ticks once per tick
      */
+    private val mainThreadDispatcherDelegate = lazy { BukkitMainThreadDispatcher(this, 1) }
+
     @get:JvmSynthetic
     @get:ApiStatus.Internal
-    val mainThreadDispatcher by lazy { BukkitMainThreadDispatcher(this, 1) }
+    val mainThreadDispatcher
+        get() = mainThreadDispatcherDelegate.value
 
     /**
      * By default, dispatches on the main thread
      */
+    private val scopeDelegate = lazy { CoroutineScope(SupervisorJob() + mainThreadDispatcher) }
+
     @get:JvmSynthetic
     @get:ApiStatus.Internal
-    val scope by lazy { CoroutineScope(SupervisorJob() + mainThreadDispatcher) }
+    val scope
+        get() = scopeDelegate.value
+
+    private var metricsInitialized = false
 
     override fun onEnable() {
         val start = System.currentTimeMillis()
 
         val expectedVersion = pluginMeta.apiVersion
-        val actualVersion = ServerBuildInfo.buildInfo().minecraftVersionId()
+        val actualVersion = Bukkit.getMinecraftVersion()
         if (actualVersion != expectedVersion) {
             logger.severe("!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!")
             logger.severe("You are running Rebar on Minecraft version $actualVersion")
@@ -121,6 +128,7 @@ object Rebar : JavaPlugin(), RebarAddon {
         pm.registerEvents(RebarAddon, this)
 
         RebarMetrics // initialize metrics by referencing it
+        metricsInitialized = true
 
         // Anything that listens for addon registration must be above this line
         registerWithRebar()
@@ -405,9 +413,14 @@ object Rebar : JavaPlugin(), RebarAddon {
     }
 
     override fun onDisable() {
-        // Note: At this point all listeners have been unregistered
-        RebarMetrics.save()
-        scope.cancel()
+        // Note: At this point all listeners have been unregistered. Avoid initializing
+        // subsystems here when onEnable failed early (for example, on a version mismatch).
+        if (metricsInitialized) {
+            RebarMetrics.save()
+        }
+        if (scopeDelegate.isInitialized()) {
+            scope.cancel()
+        }
     }
 
     override val javaPlugin = this

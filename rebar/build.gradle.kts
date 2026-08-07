@@ -40,8 +40,8 @@ dependencies {
 
     compileOnly("io.papermc.paper:paper-api:$minecraftVersion.build.+")
 
-    paperLibraryApi("xyz.xenondevs.invui:invui:2.1.0")
-    paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:2.1.0")
+    paperLibraryApi("xyz.xenondevs.invui:invui:2.2.0")
+    paperLibraryApi("xyz.xenondevs.invui:invui-kotlin:2.2.0")
     compileOnly("me.clip:placeholderapi:2.12.2")
     implementation("info.debatty:java-string-similarity:2.0.0")
     implementation("org.bstats:bstats-bukkit:2.2.1")
@@ -51,8 +51,8 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("com.willowtreeapps.assertk:assertk:0.28.1")
-    testImplementation("net.kyori:adventure-api:4.20.0")
-    testImplementation("net.kyori:adventure-text-minimessage:4.20.0")
+    testImplementation("net.kyori:adventure-api:5.2.0")
+    testImplementation("net.kyori:adventure-text-minimessage:5.2.0")
 }
 
 idea {
@@ -96,8 +96,8 @@ dokka {
             packageListUrl("https://javadoc.io/doc/net.kyori/adventure-api/latest/element-list")
         }
         externalDocumentationLinks.register("InvUI") {
-            url("https://repo.xenondevs.xyz/javadoc/releases/xyz/xenondevs/invui/invui/2.1.0/raw/")
-            packageListUrl("https://repo.xenondevs.xyz/javadoc/releases/xyz/xenondevs/invui/invui/2.1.0/raw/element-list")
+            url("https://repo.xenondevs.xyz/javadoc/releases/xyz/xenondevs/invui/invui/2.2.0/raw/")
+            packageListUrl("https://repo.xenondevs.xyz/javadoc/releases/xyz/xenondevs/invui/invui/2.2.0/raw/element-list")
         }
         sourceLink {
             localDirectory.set(file("src/main/kotlin"))
