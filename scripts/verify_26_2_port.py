@@ -31,6 +31,12 @@ require("nms/src/main/kotlin/io/github/pylonmc/rebar/nms/packet/PlayerPacketHand
 require("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "Bukkit.getMinecraftVersion()")
 require("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "if (metricsInitialized)")
 require(".github/workflows/gradle.yml", "- 'nms/**'")
+require("nms/src/main/kotlin/io/github/pylonmc/rebar/nms/NmsAccessorImpl.kt", "Vec3.atCenterOf(nmsPos)")
+forbid("nms/src/main/kotlin/io/github/pylonmc/rebar/nms/NmsAccessorImpl.kt", "nmsPos.center")
+require("nms/src/main/kotlin/io/github/pylonmc/rebar/nms/entity/BlockTextureEntityImpl.kt", "nextEntityId(block.block.world)")
+forbid("nms/src/main/kotlin/io/github/pylonmc/rebar/nms/entity/BlockTextureEntityImpl.kt", "nextEntityId()")
+require("nms/src/main/kotlin/io/github/pylonmc/rebar/nms/entity/BlockTextureEntityImpl.kt", "EntityTypes.ITEM_DISPLAY")
+forbid("nms/src/main/kotlin/io/github/pylonmc/rebar/nms/entity/BlockTextureEntityImpl.kt", "EntityType.ITEM_DISPLAY")
 
 if errors:
     print("Rebar 26.2 port verification failed:")
