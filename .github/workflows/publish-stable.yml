@@ -1,43 +1,16 @@
-name: Publish to Maven Central
+name: Maven Stable Publishing Disabled
 
 on:
-  push:
-    tags: [ '*' ]
+  workflow_dispatch:
 
-env:
-  SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-  SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-  SIGNING_KEY: ${{ secrets.PGP_KEY }}
-  SIGNING_PASSWORD: ${{ secrets.PGP_PASSWORD }}
+permissions:
+  contents: read
 
 jobs:
-  publish:
+  disabled:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Set up JDK 25
-        uses: actions/setup-java@v4.6.0
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4.2.2
-
-      - name: Verify Minecraft 26.2 port
-        run: python3 scripts/verify_26_2_port.py
-
-      - name: Publish to Maven Central
-        run: ./gradlew publishAggregationToCentralPortal -Pversion=${{ github.ref_name }}
-
-      - name: Breakpoint if publish failed
-        if: failure()
-        uses: namespacelabs/breakpoint-action@v0
-        with:
-          duration: 30m
-          authorized-users: Seggan
+      - name: Publishing is disabled on this fork
+        run: |
+          echo "Maven Central stable publishing is intentionally disabled."
+          echo "No Sonatype username, password, or PGP key is required for test builds."

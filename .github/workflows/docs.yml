@@ -1,66 +1,14 @@
-name: Deploy Kdocs/Javadocs
+name: Documentation Publishing Disabled During Port
+
 on:
-  push:
-    branches: [ "master" ]
-    paths:
-      - "**/src/**"
-      - "**/*.gradle.kts"
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
-  deploy-docs:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  disabled:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up JDK 24 for Dokka
-        uses: actions/setup-java@v4.6.0
-        with:
-          java-version: '24'
-          distribution: 'temurin'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4.2.2
-
-      - name: Check out custom Dokka
-        uses: actions/checkout@v5
-        with:
-          repository: pylonmc/dokka
-          ref: rebar
-
-      - name: Publish Dokka to Maven local
-        run: ./gradlew publishToMavenLocal -Pversion=2.3.0-rebar-SNAPSHOT
-
-      - name: Set up JDK 25 for Rebar
-        uses: actions/setup-java@v4.6.0
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Build docs
-        run: ./gradlew :rebar:dokkaGenerate -PuseRebarDokka=true
-
-      - name: Upload docs
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: 'rebar/build/dokka'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Documentation publishing is disabled during 26.2 testing
+        run: echo "Docs publishing is disabled so fork CI stays focused on test JAR builds."
