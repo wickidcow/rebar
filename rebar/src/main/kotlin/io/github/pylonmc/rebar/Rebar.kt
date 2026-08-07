@@ -99,7 +99,7 @@ object Rebar : JavaPlugin(), RebarAddon {
 
         val expectedVersion = pluginMeta.apiVersion
         val actualVersion = Bukkit.getMinecraftVersion()
-        if (actualVersion != expectedVersion) {
+        if (!minecraftVersionsMatch(actualVersion, expectedVersion)) {
             logger.severe("!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!")
             logger.severe("You are running Rebar on Minecraft version $actualVersion")
             logger.severe("This build of Rebar expects Minecraft version $expectedVersion")
@@ -428,6 +428,28 @@ object Rebar : JavaPlugin(), RebarAddon {
     override val material = Material.BEDROCK
 
     override val defaultLanguage: Locale = RebarConfig.DEFAULT_LANGUAGE
+}
+
+/**
+ * Paper may expose an API version with an explicit patch component (for example
+ * "26.2.0") while Bukkit.getMinecraftVersion() reports the same release as
+ * "26.2". Compare the numeric components after removing trailing zero patch
+ * components instead of comparing the raw strings.
+ */
+private fun minecraftVersionsMatch(actual: String, expected: String): Boolean {
+    return normalizeMinecraftVersion(actual) == normalizeMinecraftVersion(expected)
+}
+
+private fun normalizeMinecraftVersion(version: String): List<Int>? {
+    val components = version.split('.').map {
+        it.toIntOrNull() ?: return null
+    }.toMutableList()
+
+    while (components.size > 2 && components.last() == 0) {
+        components.removeAt(components.lastIndex)
+    }
+
+    return components
 }
 
 private fun addDefaultPermission(permission: String) {

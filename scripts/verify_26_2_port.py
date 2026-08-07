@@ -29,6 +29,10 @@ require("nms/src/main/kotlin/io/github/pylonmc/rebar/nms/packet/PlayerPacketHand
 require("nms/src/main/kotlin/io/github/pylonmc/rebar/nms/packet/PlayerPacketHandler.kt", "itemCost.itemStack.copy()")
 require("nms/src/main/kotlin/io/github/pylonmc/rebar/nms/packet/PlayerPacketHandler.kt", "ItemCost(itemCost.item, itemCost.count, itemCost.components, costStack)")
 require("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "Bukkit.getMinecraftVersion()")
+
+require("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "minecraftVersionsMatch(actualVersion, expectedVersion)")
+require("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "normalizeMinecraftVersion")
+forbid("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "if (actualVersion != expectedVersion)")
 require("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "if (metricsInitialized)")
 require(".github/workflows/gradle.yml", "- 'nms/**'")
 require("nms/src/main/kotlin/io/github/pylonmc/rebar/nms/NmsAccessorImpl.kt", "Vec3.atCenterOf(nmsPos)")
