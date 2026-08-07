@@ -10,6 +10,9 @@ import io.github.pylonmc.rebar.util.position.BlockPosition
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
+import net.minecraft.core.component.DataComponentExactPredicate
+import net.minecraft.core.component.DataComponentMap
+import net.minecraft.core.component.PatchedDataComponentMap
 import net.minecraft.network.HashedPatchMap
 import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.Packet
@@ -364,10 +367,14 @@ class PlayerPacketHandler(private val player: ServerPlayer, val handler: PlayerT
     }
 
     private fun translate(itemCost: ItemCost): ItemCost {
-        // ItemCost keeps an ItemStack representation of the trade cost. Translate a copy so the
-        // client-facing localized stack can never mutate the server's live MerchantOffer.
+        // Build a client-only cost from a translated copy. The predicate must describe the same
+        // translated stack sent to the client or merchant selection/click validation can desync.
+        // The live server MerchantOffer remains untouched because itemStack is copied first.
         val costStack = translate(itemCost.itemStack.copy())
-        return ItemCost(itemCost.item, itemCost.count, itemCost.components, costStack)
+        val costPredicate = DataComponentExactPredicate.allOf(
+            PatchedDataComponentMap.fromPatch(DataComponentMap.EMPTY, costStack.componentsPatch)
+        )
+        return ItemCost(costStack.typeHolder(), costStack.count, costPredicate, costStack)
     }
 
     private fun translate(item: ItemStack): ItemStack {
