@@ -97,7 +97,9 @@ object Rebar : JavaPlugin(), RebarAddon {
     override fun onEnable() {
         val start = System.currentTimeMillis()
 
-        val expectedVersion = pluginMeta.apiVersion
+        val expectedVersion = checkNotNull(pluginMeta.apiVersion) {
+            "Rebar plugin metadata is missing api-version; cannot verify Minecraft compatibility"
+        }
         val actualVersion = Bukkit.getMinecraftVersion()
         if (!minecraftVersionsMatch(actualVersion, expectedVersion)) {
             logger.severe("!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!")
@@ -437,7 +439,9 @@ object Rebar : JavaPlugin(), RebarAddon {
  * components instead of comparing the raw strings.
  */
 private fun minecraftVersionsMatch(actual: String, expected: String): Boolean {
-    return normalizeMinecraftVersion(actual) == normalizeMinecraftVersion(expected)
+    val actualComponents = normalizeMinecraftVersion(actual) ?: return false
+    val expectedComponents = normalizeMinecraftVersion(expected) ?: return false
+    return actualComponents == expectedComponents
 }
 
 private fun normalizeMinecraftVersion(version: String): List<Int>? {

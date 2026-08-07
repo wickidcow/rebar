@@ -31,6 +31,8 @@ require("nms/src/main/kotlin/io/github/pylonmc/rebar/nms/packet/PlayerPacketHand
 require("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "Bukkit.getMinecraftVersion()")
 
 require("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "minecraftVersionsMatch(actualVersion, expectedVersion)")
+require("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "checkNotNull(pluginMeta.apiVersion)")
+forbid("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "val expectedVersion = pluginMeta.apiVersion\n")
 require("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "normalizeMinecraftVersion")
 forbid("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "if (actualVersion != expectedVersion)")
 require("rebar/src/main/kotlin/io/github/pylonmc/rebar/Rebar.kt", "if (metricsInitialized)")
