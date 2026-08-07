@@ -6,6 +6,8 @@ on:
     paths:
       - "**/src/**"
       - "**/*.gradle.kts"
+      - "gradle.properties"
+      - "gradle/**"
   workflow_dispatch:
 
 env:
@@ -32,6 +34,9 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4.2.2
+
+      - name: Verify Minecraft 26.2 port
+        run: python3 scripts/verify_26_2_port.py
 
       - name: Publish snapshot to Maven Central
         run: ./gradlew publishAggregationToCentralPortalSnapshots
