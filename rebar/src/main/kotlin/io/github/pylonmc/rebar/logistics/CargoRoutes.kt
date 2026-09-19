@@ -86,7 +86,9 @@ object CargoRoutes : Listener {
 
                 val faces = currentBlock.connectedFaces.toMutableList()
                 faces.remove(lastFaceUsed.oppositeFace)
-                check(faces.size == 1) { "Expected node to have one traversable face but had ${faces.size}" }
+                if (faces.size != 1) {
+                    break
+                }
                 val nextFace = faces[0]
 
                 current = current.getRelative(nextFace)
