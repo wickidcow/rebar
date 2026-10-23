@@ -93,6 +93,7 @@ public class RebarTest extends JavaPlugin implements RebarAddon {
         tests.add(new FluidFlowRateTest());
         tests.add(new FluidPredicateTest());
 
+        tests.add(new ElectricPortLifecycleTest());
         tests.add(new SimpleElectricNetworkTest());
         tests.add(new SinglyConnectedElectricNetworkTest());
         tests.add(new MultipleProducerElectricNetworkTest());
