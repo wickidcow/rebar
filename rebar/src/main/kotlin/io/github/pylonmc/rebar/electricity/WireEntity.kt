@@ -160,10 +160,10 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
 
         if (otherEnd != null) {
             val pdc = entity.persistentDataContainer
-            pdc.set(portKey, RebarSerializers.UUID, port.node.id)
+            pdc.set(portKey, RebarSerializers.UUID, port.nodeId)
             pdc.set(portLocKey, RebarSerializers.LOCATION, port.location)
 
-            pdc.set(otherEndKey, RebarSerializers.UUID, otherEnd.node.id)
+            pdc.set(otherEndKey, RebarSerializers.UUID, otherEnd.nodeId)
             pdc.set(otherEndLocKey, RebarSerializers.LOCATION, otherEnd.location)
 
             pdc.set(itemKey, itemType, wire)
@@ -176,7 +176,15 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
     override fun onRemoved(event: EntityRemoveEvent, priority: EventPriority) {
         when (val otherEnd = otherEnd) {
             is Either.Left -> WireConnectionService.stopConnectingWire(otherEnd.value, delete = false)
-            is Either.Right -> otherEnd.value.node.disconnectFrom(port.node)
+            is Either.Right -> {
+                // One end may already be unloaded or broken. Removing the display
+                // entity must still succeed without resolving a missing node.
+                val firstNode = ElectricityManager.getNodeById(port.nodeId)
+                val secondNode = ElectricityManager.getNodeById(otherEnd.value.nodeId)
+                if (firstNode != null && secondNode != null) {
+                    secondNode.disconnectFrom(firstNode)
+                }
+            }
         }
     }
 
@@ -237,7 +245,7 @@ class WireEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler {
         TOO_LONG(Component.translatable("rebar.message.wiring.too_long", RebarArgument.of("blocks", RebarConfig.WIRING_MAX_LENGTH)))
     }
 
-    class ConnectedPort(private val nodeId: UUID, val location: Location) {
+    class ConnectedPort(val nodeId: UUID, val location: Location) {
         constructor(node: ElectricNode, location: Location) : this(node.id, location)
         val node by lazy { ElectricityManager.getNodeById(nodeId)!! }
     }

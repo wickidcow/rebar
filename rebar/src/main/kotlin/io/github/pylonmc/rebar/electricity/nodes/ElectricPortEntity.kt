@@ -29,11 +29,16 @@ import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityRemoveEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import java.util.UUID
 import kotlin.math.PI
 
 class ElectricPortEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler, Listener {
 
-    val node: ElectricNode by lazy { ElectricityManager.getNodeById(entity.persistentDataContainer.get(nodeKey, RebarSerializers.UUID)!!)!! }
+    // Keep the UUID independent of the node registry: the block may unload before its port entity.
+    private val nodeId: UUID?
+        get() = entity.persistentDataContainer.get(nodeKey, RebarSerializers.UUID)
+
+    val node: ElectricNode by lazy { ElectricityManager.getNodeById(nodeId!!)!! }
 
     constructor(block: Block, port: ElectricPortSpec) : super(
         KEY,
@@ -66,7 +71,14 @@ class ElectricPortEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler, L
     }
 
     val connectedWires: List<WireEntity>
-        get() = WireEntity.loadedWires.filter { wire -> wire.port.node == node || (wire.otherEnd as? Either.Right)?.value?.node == node }
+        get() {
+            val id = nodeId ?: return emptyList()
+            // A connected wire's other endpoint may already be unloaded. Compare IDs,
+            // rather than resolving every wire endpoint through the live node registry.
+            return WireEntity.loadedWires.filter { wire ->
+                wire.port.nodeId == id || (wire.otherEnd as? Either.Right)?.value?.nodeId == id
+            }
+        }
 
     private fun dropConnectedWires() {
         for (wire in connectedWires) {
@@ -78,9 +90,17 @@ class ElectricPortEntity : RebarEntity<ItemDisplay>, RemoveRebarEntityHandler, L
 
     @EventHandler
     private fun onNodeRemove(event: RebarElectricNodeRemoveEvent) {
-        if (event.node == node) {
+        // This event is broadcast to every port listener. Never resolve an unrelated
+        // port's node: its block may have been unloaded or removed already.
+        if (event.node.id == nodeId) {
             dropConnectedWires()
         }
+    }
+
+    override fun onUnload() {
+        // EntityStorage invokes this on chunk/entity unload, not on deletion.
+        // Without unregistering, stale listeners survive and run on later block breaks.
+        HandlerList.unregisterAll(this)
     }
 
     override fun onRemoved(event: EntityRemoveEvent, priority: EventPriority) {
